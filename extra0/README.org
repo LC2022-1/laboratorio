@@ -1,0 +1,17 @@
+#+title: Sesión extra
+
+* Árboles de Huffman
+#+begin_src haskell
+data Tree a
+  = Leaf {freq :: Int, val :: a}
+  | Node {freq :: Int, left :: Tree a, right :: Tree a}
+#+end_src
+
+#+begin_src haskell
+merge :: Tree a -> Tree a -> Tree a
+merge t1 t2 = Node (freq t1 + freq t2) t1 t2
+#+end_src
+
+#+begin_src haskell
+freqs :: [a] -> [(a, Int)]
+#+end_src
