@@ -60,7 +60,7 @@ getCodes (Leaf _ v) = [(v, [])]
 getCodes (Node _ l r) = add Zero (getCodes l) ++ add One (getCodes r)
 
 add :: a -> [(b, [a])] -> [(b, [a])]
-add x = map (\(y, xs) -> (y, (x:xs)))
+add x = map (\(y, xs) -> (y, x:xs))
 
 decode :: Ord a => [Bit] -> Tree a -> [a]
 decode bits t = matchAll bits t
@@ -71,4 +71,11 @@ decode bits t = matchAll bits t
     matchAll [] _ = []
 
 main :: IO ()
-main = putStrLn "Hola"
+main = do
+  line <- putStrLn "¿Qué quieres codificar?" *> getLine
+  let (tree, coded) = encode line
+  let codes = getCodes tree
+  putStrLn $ "Códigos generados: " ++ show codes
+  putStrLn $ "Mensaje codificado: " ++ show coded
+  let decoded = decode coded tree
+  putStrLn $ "Mensaje decodificado: " ++ decoded

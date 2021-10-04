@@ -1,17 +1,68 @@
 #+title: Sesión extra
 
+* Diseñar soluciones
++ Dividir el problema en subproblemas
++ Pequeños e independientes
+
 * Árboles de Huffman
-#+begin_src haskell
-data Tree a
-  = Leaf {freq :: Int, val :: a}
-  | Node {freq :: Int, left :: Tree a, right :: Tree a}
-#+end_src
++ Códigos perfectos
++ Árboles re prefijos
++ No muy usados en la práctica
 
-#+begin_src haskell
-merge :: Tree a -> Tree a -> Tree a
-merge t1 t2 = Node (freq t1 + freq t2) t1 t2
-#+end_src
+** Algoritmo
+1. Ordernas los caracteres por frecuencia
+2. Juntar las dos frecuencias más pequeñas para formar una nueva frecuencia
+3. Realizar el paso anterior hasta solo tener una raíz
+4. Generar códigos recorriendo el árbol de la raíz
+   a. 0 cuando se vaya a la izquierda
+   b. 1 cuando se vaya a la derecha
 
+** Algún ejemplo
+
+** Uso
++ Para codificar, concatenar el código de cada caracter
++ Para decodificar, usar el árbol para encontrar el prefijo único que corresponde al caracter decodificao
+
+** Como guardar la información
++ Entrada y salida
++ Frecuencias
++ Códigos
++ Árbol
+
+** Funciones necesarias
+*** Encontrar frecuencias
 #+begin_src haskell
 freqs :: [a] -> [(a, Int)]
 #+end_src
+
+*** Ordenar
+#+begin_src haskell
+sort :: Ord a => [a] -> [a]
+#+end_src
+
+*** Juntar frecuencias en una nueva frecuencia
+#+begin_src haskell
+merge :: Tree a -> Tree a -> Tree a
+#+end_src
+
+*** Encontrar nuevos mínimos
++ Montículos
++ Estructura ordenada
+
+*** Recorrer el árbol para generar códigos
+#+begin_src haskell
+getCodes :: Ord a => Tree a -> [(a, [Bit])]
+#+end_src
+
+*** Codificar
+#+begin_src haskell
+encode :: Ord a => [a] -> (Tree a, [Bit])
+#+end_src
+
+*** Decodificar
+#+begin_src haskell
+decode :: Ord a => [Bit] -> Tree a -> [a]
+#+end_src
+
+* Referencias
++ [[https://www.algorithm-archive.org/contents/huffman_encoding/huffman_encoding.html][Huffman Encoding · Arcane Algorithm Archive]]
