@@ -37,14 +37,15 @@
 
 * Interpretaciones
 ** Definición
-\[
-I : Vars \to \{0, 1\}
-\]
+#+begin_example
+I : Vars -> {0, 1}
+#+end_example
 
 + Asigna valores de verdad a las variables
 
 ** Valore de verdad de una fórmula
 
-\[v_{I} : LP \to \{0, 1\}\]
-
-+ En Haskell ~eval :: Inter -> Formula -> Bool~
+#+begin_example
+v_{I} : LP -> {0, 1}
+#+end_example
++ Usa los valores de verdad de las variables y el significado de los operadores para dar un valor de verdad a toda la fórmula
