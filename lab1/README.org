@@ -190,7 +190,7 @@ dependencies:
 #+end_src
 
 + Si ~stack~ no tiene el paquete, habría además que agregarlo en ~stack.yaml~
-#begin_src yaml
+#+begin_src yaml
 extra-deps:
 - aqui
 #+end_src

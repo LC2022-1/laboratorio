@@ -1,0 +1,50 @@
+#+title: Lógica proposicional
+
+* Gramática
+** Lo que vieron en clase
+
+#+begin_src
+<form> ::= "0" | "1" | <atom> | "¬" <form> | <form> <op> <form>
+<op> ::= "&" | "|" | "<->" | "->"
+<atom> ::= ?
+#+end_src
+
++ Por ejemplo ~p & q <-> ¬r~
++ En Haskell, se pueden definir funciones infijas con ciertos símbolos
+
+** Precedencia y asociatividad
+
+| Op  | Pred |
+|-----+------|
+| &   |    4 |
+| or  |    3 |
+| ->  |    2 |
+| <-> |    1 |
+
++ Todos asocian a la derecha
+
+*** En Haskell
++ ~infixl n~ da una prededencia de $n$ y asocia a la izquierda
++ ~infixr n~ da una prededencia de $n$ y asocia a la derecha
+
+** Notación polaca (Jan Łukasiewicz)
++ ~<form> ::= <op> <form> <form>~
++ Ejemplo
+#+begin_example
+<-> p q es lo mismo que p <-> q
+& <-> p q | r q es lo mismo que (p <-> q) & (r | q)
+#+end_example
+
+* Interpretaciones
+** Definición
+\[
+I : Vars \to \{0, 1\}
+\]
+
++ Asigna valores de verdad a las variables
+
+** Valore de verdad de una fórmula
+
+\[v_{I} : LP \to \{0, 1\}\]
+
++ En Haskell ~eval :: Inter -> Formula -> Bool~
