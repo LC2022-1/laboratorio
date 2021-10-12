@@ -1,0 +1,49 @@
+#+TITLE: Tablas de verdad
+
+* Tablas de verdad
+** ¿Qué son?
++ $n+1$ columnas, una por cada variable, más una para la fórmula
++ Una fila por cada interpretación
+
+| p | q | p <-> q |
+|---+---+---------|
+| 0 | 0 |       1 |
+| 0 | 1 |       0 |
+| 1 | 0 |       0 |
+| 1 | 1 |       1 |
+
+** Problema SAT (3-SAT, 2-SAT)
++ NP-Completo (el primero)
++ ¿Solución obvia?
++ Mejores soluciones (Tableaux, Resolución)
+
+** ¿Cómo generarlas?
++ Dividir problema en pasos más pequeños
+*** Obtener variables
++ Formular el problema de forma recursiva
+
+*** Obtener interpretaciones
++ Formular el problema de forma recursiva
++ $I : A \to \{0, 1\}$
+*** Evaluar fórmula en cada interpretación
++ ¿Cómo evaluar una fórmula con una interpretación?
++ ¿Cómo evaluar una fórmula con muchas intepretaciones?
+
+* Sustituciones
++ Dada una fórmular, reemplazar algunas de sus subfórmulas
++ $A_{[B \leftarrow p \lor q]}$
++ ¿Cómo definir el tipo para las sustituciones?
++ Definir el problema de forma recursiva
+* Propiedades semánticas
+** Satisfacible
++ Una interpretación que la hace verdadera
+** Falsable
++ Una interpretación la hace falsa
+** Válida (tautología)
++ Todas las interpretaciones la hacen verdadera
+** Insatisfacible (contradicción)
++ Todas las interpretaciones la hacen falsa
+** Consecuencia lógica
++ $U \models A$, $\models A$
++ Todos los modelos de $U$ son modelos de $A$
++ ¿Cómo se define en términos de las anteriores?
