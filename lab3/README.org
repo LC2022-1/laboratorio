@@ -3,7 +3,7 @@
 * Tablas de verdad
 ** ¿Qué son?
 + $n+1$ columnas, una por cada variable, más una para la fórmula
-+ Una fila por cada interpretación
++ Una fila por cada interpretación $2^n$
 
 | p | q | p <-> q |
 |---+---+---------|
@@ -13,6 +13,7 @@
 | 1 | 1 |       1 |
 
 ** Problema SAT (3-SAT, 2-SAT)
++ SAT -> satisfacibilidad
 + NP-Completo (el primero)
 + ¿Solución obvia?
 + Mejores soluciones (Tableaux, Resolución)
@@ -21,6 +22,12 @@
 + Dividir problema en pasos más pequeños
 *** Obtener variables
 + Formular el problema de forma recursiva
+#+begin_src haskell
+getVars T = ?
+getVars F = ?
+getVars (Atom v) = ?
+getVars (And (Atom "p") (Atom "p")) = ?
+#+end_src
 
 *** Obtener interpretaciones
 + Formular el problema de forma recursiva
@@ -29,11 +36,6 @@
 + ¿Cómo evaluar una fórmula con una interpretación?
 + ¿Cómo evaluar una fórmula con muchas intepretaciones?
 
-* Sustituciones
-+ Dada una fórmular, reemplazar algunas de sus subfórmulas
-+ $A_{[B \leftarrow p \lor q]}$
-+ ¿Cómo definir el tipo para las sustituciones?
-+ Definir el problema de forma recursiva
 * Propiedades semánticas
 ** Satisfacible
 + Una interpretación que la hace verdadera

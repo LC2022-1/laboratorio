@@ -58,3 +58,20 @@ eval i (And p q) = eval i p && eval i q
 eval i (Or p q) = eval i p || eval i q
 eval i (Impl p q) = not (eval i p) || eval i q
 eval i (Equiv p q) = eval i (Impl p q) && eval i (Impl q p)
+
+getVars :: Formula -> [String]
+getVars T = []
+getVars F = []
+getVars (Atom v) = [v]
+getVars (Not p) = getVars p
+getVars (And p q) = getVars p ++ getVars q
+-- ¿cómo eliminar repeticiones?
+
+add :: a -> [[a]] -> [[a]]
+add a = map (a:)
+
+genInter :: [String] -> [[(String, Bool)]]
+genInter [] = [[]]
+genInter (x:xs) =
+  let others = genInter xs in
+    add (x, False) others ++ add (x, True ) others
