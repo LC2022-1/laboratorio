@@ -1,0 +1,98 @@
+#+title: Más ~Maybe~ y Tableaux semánticos
+
+* Más maneras de usar ~Maybe~
+** ~case~
++ Caza de patrones son expresiones
++ Valores en el cuerpo de una función
+
+** Funtores y Aplicativos
++ ¿Qué son interfaces?
+
+*** ~map~
+#+begin_example
+type Functor :: (* -> *) -> Constraint
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+  (<$) :: a -> f b -> f a
+#+end_example
+
+*** Más de un parámetro
+#+begin_example
+class Functor f => Applicative f where
+  pure :: a -> f a
+  (<*>) :: f (a -> b) -> f a -> f b
+  GHC.Base.liftA2 :: (a -> b -> c) -> f a -> f b -> f c
+  (*>) :: f a -> f b -> f b
+  (<*) :: f a -> f b -> f a
+#+end_example
+
+* Tableaux
+** Ejemplo
++ $p \implies q \iff \lnot r \land q$
+** Algoritmo general
+1. Iniciar tableau con fórmula en la raíz
+2. Mientras haya una hoja sin marcar
+   1. Si las fórmulas de esa hoja son literales, marcar abierto si es satisfacible y cerrado si no
+   2. Si hay alguna no literal, clasificarlo como alfa o beta
+      1. Si es alfa, crea una nueva hoja reemplazando la fórmula con las subfórmulas
+      2. Si es beta, crear una nueva hoja por subfórmula, reemplazando la fórmula por la subfórmula
+	  correspondiente
+
+*** Forma recursiva
++ Listas separadas para fórmulas y literales
++ Hacer recursión sobre la lista de fórmulas por procesar
+
+** Tipos
+*** ~Literal a~
+#+begin_src haskell
+data Literal a = N a | P a
+#+end_src
+
+*** ~Class a~
+#+begin_src haskell
+data Class a
+  = Alpha {left :: Formula a, right :: Formula a}
+  | Beta {left :: Formula a, right :: Formula a}
+  | Lit {lit :: Literal a}
+  | Na {atom :: Formula a}
+#+end_src
+
+*** ~Tableau a~
+#+begin_src haskell
+data Tableau a
+  = Tableau
+    {formulas :: [Formula a]
+    ,literals :: [Literal a]
+    ,children :: [Tableau a]
+     }
+#+end_src
+
+** Funciones
++ Clasificar
+#+begin_src haskell
+classify = undefined
+#+end_src
+
++ Conjunto de literales satisfafibles
+  
++ Construir tableau
+#+begin_src haskell
+makeTableau :: Formula a -> Tableau a
+#+end_src
+
++ Determinar si un tablea está abierto
+#+begin_src haskell
+isOpen :: Eq a => Tableau a -> Bool
+#+end_src
+
+** Detalles de implementación
+*** ~Alpha (Not a)~
++ Única con una sóla fórmula
++ $\lnot p \equiv \lnot p \land true$
++ ¿Equivalente con alfa fórmula con dos subfórmulas?
+  
+*** ~F~ y ~T~
++ No son alfa, beta, ni literales
++ ~T~ irrelevante
++ ~F~ rompe todo
+  

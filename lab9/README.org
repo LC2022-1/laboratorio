@@ -1,0 +1,172 @@
+#+title: Resolución
+
+* Pasos
+1. Pasar a forma normal conjuntiva
+2. Pasar a forma clausular
+3. Resolver clausulas hasta
+   1. Resolver todos los conflictos
+   2. Encontrar la cláusula vacía
+
+* Formas normales
++ Tranformar una fórmula a otra equivalente con una estructura más simple
+
+** Forma normal negativa
+
++ Solo variables, negaciones de variables, conjunciones y disjunciones
+*** Pasos
+
+1. Eliminar implicaciones y equivalencias
+
+\[
+p \implies q \to \lnot p \lor q
+\]
+
+\[
+p \iff q \to \lnot p \lor q \land \lnot q \lor p
+\]
+
+2. Meter negaciones (leyes de Morgan)
+
+\[\lnot (p \land q) \to \lnot p \lor \lnot q\]
+
+\[\lnot (p \lor q) \to \lnot p \land \lnot q\]
+
++ En Haskell
+#+begin_src haskell
+  toNnf :: Formula a -> Formula a
+#+end_src
+
+** Forma normal conjuntiva
++ Forma normal negativa + conjunción de disjunciones
++ Leyes distributivas para la disjunción
+
+\[p \lor (q \land r) \to (p \lor q) \land (p \lor r)\]
+
++ En Haskell
+#+begin_src haskell
+  toCnf :: Formula a -> Formula a
+#+end_src
+
+** Forma clausular
++ Notación para la forma normal conjuntiva
+
+\[
+(p \lor q \lor r) \land (\lnot r \lor p) \land (\lnot s \lor q)
+\to \{pqr, \bar{r} p, \bar{s} q\}
+\]
+
++ En Haskell
+#+begin_src haskell
+  data Literal a = N a | P a
+
+  type Clause a = [Literal a]
+
+  type ClausulalForm a = [Clausulal a]
+#+end_src
+
++ Y para cambiar de notación
+#+begin_src haskell
+  toClausulal :: Formula a -> ClausulalForm a
+#+end_src
+
+* Resolución
+
+** Resolver cláusulas
++ Dadas dos cláusulas, ¿qué es necesario para que ambas sean verdaderas?
+
+*** Pasos
+1. Seleccionar dos cláusulas $c_1, c_2$ con una literal complementaria, digamos $l$
+2. Quitar la literal complementaria de ambas clausulas
+3. Juntar las dos clausulas en una
+
+Sin perdida de generalidad, esto se puede expresar de la siguiente manera
+
+\[c' = (c_1 - l) + (c_2 - l^{c}) \]
+
++ Para Haskell
+#+begin_src haskell
+  resolve :: Clause a -> Clause a -> Clause a
+#+end_src
+
+** Satisfacibilidad de clausulas
++ Clausula  $\to \bigvee$
++ Es verdadera si alguna de sus literales es verdadera
+
+*** Triviales
++ Si tiene una tautología es verdadera
++ $p \lor \lnot p \to \{p \bar{p}\}$ es tautología
++ Si una clausula contiene literales complemetarias, es trivialmente verdadera
+
+#+begin_src haskell
+  clashes :: Clause a -> Clause a -> Maybe a
+
+  isTrivial :: Clause a -> Clause a
+  isTrivial c = isJust $ clashes c c
+#+end_src
+
+*** Insatifacibles
++ Si está vacía, no tiene literales
++ Como no puede tener una literal verdadera, es falsa
++ La clausula vacía $\square$ es insatisfacible
+
+#+begin_src haskell
+  isEmpty :: Clause a -> Bool
+  isEmpty [] = True
+  isEmpty _ = False
+#+end_src
+
+*** Lista de cláusulas
++ Lista de clausulas $\to \bigwedge$
++ Es falsa si alguna de sus literales es falsa
++ Si una forma clausular tiene una clausula vacía, es insatisfacible
+
+#+begin_src haskell
+  hasEmpty :: ClausulalForm a -> Bool
+#+end_src
+
+** Resolución para fórmula arbitraria
+#+begin_src haskell
+  resolution :: ClausulalForm a -> Bool
+#+end_src
+
+*** Se tiene la fórmula como lista de cláusulas
+*** Parar si todas las clausulas están resueltas
++ Sinónimo para que sea más claro
++ Para saber si todas están resueltas, hay que verificar que no haya ningún par en conflicto
+#+begin_src haskell
+  type Clashing a = (Clause a, Clause a)
+
+  clashList :: ClausulalForm a -> [Clashing a]
+#+end_src
+
+*** Clausas complemetarias que no haya sido escojida antes
++ Hay que mantener un registro de las clausuas que han sido usadas :(
+#+begin_src haskell
+  data ResolReg a = ResolReg (ClausulalForm a) [Clashing a]
+
+  someClash :: ResolReg a -> Maybe (Clashing a)
+#+end_src
+
+*** Obtener la resolución de esas cláusulas
+#+begin_src haskell
+  resolution cs
+    | null clashList cs = True
+    | otherwise = applyRes $ ResolReg (not . isTrivial $ cs) []
+
+  applyRes :: ResolReg a => Bool
+  applyRes r@(ResolReg cs rs) =
+    case someClash r of
+      Nothing -> True
+      Just (c1, c2) -> let c = resolve c1 c2 in undefined
+#+end_src
+
+*** Si no es trivial, se agrega a la lista de cláusulas
+#+begin_src haskell
+  Just (c1, c2) -> let c = resolve c1 c2 in
+    let clauses = if isTrivial c then cs else (c:cs) in
+#+end_src
+
+*** Si la clausula es vacía, deternerse y fallar
+#+begin_src haskell
+  if isEmpty c then False else applyRes clauses (c1, c2):rs
+#+end_src

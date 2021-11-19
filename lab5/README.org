@@ -1,0 +1,4 @@
+#+title: Cosas útiles en Haskell
+
+* ~Debug.Trace~
+
