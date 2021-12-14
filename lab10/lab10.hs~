@@ -1,0 +1,54 @@
+-- | Mark for literals
+data Literal a
+  = P {getAtom :: a}
+  | N {getAtom :: a} deriving Eq
+
+instance Show a => Show (Literal a) where
+  show (P a) = show a
+  show (N a) = "~" ++ show a
+
+-- | Allowed binary operators for formulas
+data Op
+  = Dis -- ^ Disjunction (Or)
+  | Conj -- ^ Conjunction (And)
+  | Impl -- ^ Implication
+  | Equiv -- ^ Logical equivalence
+  deriving (Eq, Enum)
+
+-- | Propositional formulas.
+-- Using polish notation
+data Formula a
+  = T
+  | F
+  | Atom a
+  | Not (Formula a)
+  | Bin Op (Formula a) (Formula a)
+  deriving (Eq)
+
+instance Show Op where
+  show Dis = "|"
+  show Conj = "&"
+  show Impl = "->"
+  show Equiv = "<->"
+
+instance Show a => Show (Formula a) where
+  show T = "T"
+  show F = "F"
+  show (Atom a) = show a
+  show (Not p) = "¬" ++ show p
+  show (Bin op l r) = "(" ++ show l ++ " " ++ show op ++ " " ++ show r ++ ")"
+
+type Clause a = [Literal a]
+
+maxClause :: (Ord a, Enum a) => [Clause a] -> a
+maxClause = maximum . map maximum . map (map getAtom)
+
+to3CNF :: Enum a => [Clause a] -> [Clause a]
+to3CNF cs = to3CNFm (maxClause cs) cs
+
+to3CNF :: Enum a => [Clause a] -> [Clause a]
+to3CNF x [] = []
+to3CNF x (c:cs) =
+  nc ++ to3CNF (maxClause nc) cs
+    where
+      nc = conflictRule x cs

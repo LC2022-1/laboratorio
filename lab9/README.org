@@ -1,12 +1,15 @@
 #+title: Resolución
 
+* ¿Qué es?
++ Un método (algoritmo) para verificar la satisfacibilidad de una fórmula
++ Sólo funciona para cierto tipo de fórmulas
++ Para listas de clausulas
 * Pasos
-1. Pasar a forma normal conjuntiva
-2. Pasar a forma clausular
-3. Resolver clausulas hasta
-   1. Resolver todos los conflictos
-   2. Encontrar la cláusula vacía
-
+1. Pasar la fórmulas a forma normal conjuntiva
+2. Pasarlo a forma clausular
+3. Resolver los conflictos de las clausulas
+   1. Si no no se pueden resolver, la fórmula es insatisfacible
+   2. En otro caso, sí es satisfacible
 * Formas normales
 + Tranformar una fórmula a otra equivalente con una estructura más simple
 
@@ -38,6 +41,7 @@ p \iff q \to \lnot p \lor q \land \lnot q \lor p
 
 ** Forma normal conjuntiva
 + Forma normal negativa + conjunción de disjunciones
+*** Pasos
 + Leyes distributivas para la disjunción
 
 \[p \lor (q \land r) \to (p \lor q) \land (p \lor r)\]
@@ -55,16 +59,16 @@ p \iff q \to \lnot p \lor q \land \lnot q \lor p
 \to \{pqr, \bar{r} p, \bar{s} q\}
 \]
 
-+ En Haskell
+*** En Haskell
 #+begin_src haskell
   data Literal a = N a | P a
 
   type Clause a = [Literal a]
 
-  type ClausulalForm a = [Clausulal a]
+  type ClausulalForm a = [Clause a]
 #+end_src
 
-+ Y para cambiar de notación
+*** Y para cambiar de notación
 #+begin_src haskell
   toClausulal :: Formula a -> ClausulalForm a
 #+end_src
@@ -85,6 +89,8 @@ Sin perdida de generalidad, esto se puede expresar de la siguiente manera
 
 + Para Haskell
 #+begin_src haskell
+  clashes :: Clause a -> Clause a -> Maybe a
+  removeLit :: Clause a -> a -> Clause a
   resolve :: Clause a -> Clause a -> Clause a
 #+end_src
 
@@ -96,24 +102,10 @@ Sin perdida de generalidad, esto se puede expresar de la siguiente manera
 + Si tiene una tautología es verdadera
 + $p \lor \lnot p \to \{p \bar{p}\}$ es tautología
 + Si una clausula contiene literales complemetarias, es trivialmente verdadera
-
-#+begin_src haskell
-  clashes :: Clause a -> Clause a -> Maybe a
-
-  isTrivial :: Clause a -> Clause a
-  isTrivial c = isJust $ clashes c c
-#+end_src
-
 *** Insatifacibles
 + Si está vacía, no tiene literales
 + Como no puede tener una literal verdadera, es falsa
 + La clausula vacía $\square$ es insatisfacible
-
-#+begin_src haskell
-  isEmpty :: Clause a -> Bool
-  isEmpty [] = True
-  isEmpty _ = False
-#+end_src
 
 *** Lista de cláusulas
 + Lista de clausulas $\to \bigwedge$
@@ -130,6 +122,7 @@ Sin perdida de generalidad, esto se puede expresar de la siguiente manera
 #+end_src
 
 *** Se tiene la fórmula como lista de cláusulas
+
 *** Parar si todas las clausulas están resueltas
 + Sinónimo para que sea más claro
 + Para saber si todas están resueltas, hay que verificar que no haya ningún par en conflicto
@@ -145,15 +138,20 @@ Sin perdida de generalidad, esto se puede expresar de la siguiente manera
   data ResolReg a = ResolReg (ClausulalForm a) [Clashing a]
 
   someClash :: ResolReg a -> Maybe (Clashing a)
+  someClash (ResolReg clausulas historial) =
+    case [c | c <- clashList clausulas, not c `elem` historial] of
+      [] -> Nothing
+      (x:_) -> Just x
 #+end_src
+*** Nueva función para resolución sobre el nuevo tipo
+#+begin_src haskell
+  resolution cs = applyRes $ ResolReg cs []
 
+  applyRes :: ResolReg a -> Bool
+#+end_src
 *** Obtener la resolución de esas cláusulas
 #+begin_src haskell
-  resolution cs
-    | null clashList cs = True
-    | otherwise = applyRes $ ResolReg (not . isTrivial $ cs) []
-
-  applyRes :: ResolReg a => Bool
+  applyRes :: ResolReg a -> Bool
   applyRes r@(ResolReg cs rs) =
     case someClash r of
       Nothing -> True

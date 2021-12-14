@@ -1,0 +1,77 @@
+#+title: Transformaciones a 3CNF
+
+* ¿Para qué?
++ Demostrar que 3SAT es equivalente a SAT.
++ Demotrar NP-Completez es más sencillo
++ La forma más sencilla de probar P = NP
++ 2SAT no es NP-Completo
+
+* Generar variables nuevas
+** ~Enum a~
++ Un conjunto es enumerable si es biyectable con los naturales
+#+begin_src haskell
+  class Enum a where
+    succ :: a -> a
+    pred :: a -> a
+    toEnum :: Int -> a
+    fromEnum :: a -> Int
+    enumFrom :: a -> [a]
+    enumFromThen :: a -> a -> [a]
+    enumFromTo :: a -> a -> [a]
+    enumFromThenTo :: a -> a -> a -> [a]
+    {-# MINIMAL toEnum, fromEnum #-}
+#+end_src
+
++ Para generar nuevas variables, bastaría con usar ~succ~.
+
+** Obtener punto inicial
++ ¿Como saber el valor inicial que se necesita pasar a ~succ~?
+#+begin_src haskell
+  clauseMax :: Ord a => [Clause a] -> a
+  clauseMax = undefined
+#+end_src
++  Pueden usar ~map getAtom~ para obtener una lista de ~Enum a~ a partir de una cláusula
+* Transformación canónica
+** Regla de resolución al revés
++ Dada una cláusula $c$, crear un conflicto
+  1. Definir una nueva variable $p$
+  2. Partes a $c$ es $c'$ y $c''$ (no necesariamente disjuntos)
+  3. Definir $c_{1} = c' + p$ y $c_{2} = c'' + \bar p$
+  4. Notemos que $res(c_{1}, c_{2}) = c$
+
+** Una literal $l$
+1. Aplicar la regla del conflicto a $l$
+   + $\{lp, l \bar p\}$
+2. Aún no son tres variables por cláusula. Otra vez
+   + $\{lpq, lp\bar q, l \bar p r, l \bar p \bar r\}$
+   + Ya tiene tres variables por cláusula
+
+** Dos literales
+1. Aplicar la regla del conflicto a $lm$
+   + $\{lmp, lm \bar p \}$
+   + Ya tiene tres variables por cláusula
+
+** Más de tres literales
+1. Aplicar la regla del conflicto a $l_{1} l_{2} l_{3}\dots l_{n}$
+   + $\{l_{1} l_{2} p, \bar p l_{3} \dots l_{n}\}$
+2. Si $\bar p l_{3} \dots l_{n}$ ya tiene tres literales, deternerse
+3. Si no, aplicar recursivamente la regla hasta terminar
+
+* Transformación de Tseitin
+** Renombrar subfórmulas
++ $a \iff p \circ q$ significa que $a$ es un alias de $p \circ q$
++ Como solo tiene tres variables, su CNF es 3CNF
+
+** Para clausulas
++ $p \lor q \lor r  \lor s \lor t \lor u$
++ Se puede tomar $p \lor q$ y reemplazarlo por $a$
++ $(a \iff p \lor q) \bigwedge a \lor r \lor s \lor t \lor u$
++ $(b \iff a \lor r) \bigwedge (a \iff p \lor q) \bigwedge b \lor s \lor t \lor t$
++ $(c \iff b \lor s) \bigwedge (b \iff a \lor r) \bigwedge (a \iff p \lor q) \bigwedge c \lor t \lor t$
+
+** Para listas de clausulas
++ Solo aplicar la transformación a cada clausula y juntar el resultado
+
+** En general
++ Para cada subfórmula de más de tres variables
++ Reemplazar parte de ella con un alias
